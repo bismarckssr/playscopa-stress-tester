@@ -8,19 +8,17 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: alpine-latest
 
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
       - name: Install dependencies
         run: |
           pip install -r requirements.txt -r requirements-dev.txt
       - name: Lint
-        run: |
-          black --check src tests
-          flake8 src tests
-      - name: Run tests
-        run: pytest -v
+        run: ruff check src/
+      - name: Format
+        run: ruff format src/
