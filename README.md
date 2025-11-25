@@ -1,49 +1,49 @@
 # Playscopa Stress Tester
 
-Stress tester per il server WebSocket di [Playscopa](https://playscopa.online/), un'implementazione online del gioco della Scopa.
+A WebSocket stress testing tool for [Playscopa](https://playscopa.online/), an online implementation of the Italian card game Scopa.
 
-## 📋 Descrizione
+## :clipboard: Description
 
-Questo tool permette di testare le prestazioni e la stabilità del server WebSocket di Playscopa simulando un numero elevato di client connessi contemporaneamente. Ogni client virtuale si comporta come un giocatore reale: si connette al server, risponde ai ping, riceve le carte iniziali ed esegue mosse durante il gioco.
+This tool allows you to test the performance and stability of the Playscopa WebSocket server by simulating a large number of concurrent connected clients. Each virtual client behaves like a real player: connects to the server, responds to pings, receives starting cards, and executes moves during the game.
 
-### ✨ Funzionalità
+### :sparkles: Features
 
-- **Connessioni simultanee**: Crea migliaia di client WebSocket concorrenti
-- **Comportamento realistico**: Ogni client simula un giocatore vero
-  - Risponde ai messaggi di benvenuto
-  - Gestisce i ping/pong
-  - Riceve e gioca le carte
-  - Sceglie le combo quando richiesto
-- **Architettura asincrona**: Utilizza `asyncio` per gestione efficiente delle connessioni
-- **Configurabile**: Numero di client e durata del test personalizzabili
+- **Concurrent connections**: Creates thousands of concurrent WebSocket clients
+- **Realistic behavior**: Each client simulates a real player
+  - Responds to welcome messages
+  - Handles ping/pong
+  - Receives and plays cards
+  - Chooses combos when requested
+- **Asynchronous architecture**: Uses `asyncio` for efficient connection management
+- **Configurable**: Customizable number of clients and test duration
 
-## 📦 Requisiti
+## :package: Requirements
 
 - Python 3.11+
 - pip
 
-## 🚀 Installazione
+## :rocket: Installation
 
-1. Clona il repository:
+1. Clone the repository:
 ```bash
 git clone https://github.com/bismarckssr/playscopa-stress-tester.git
 cd playscopa-stress-tester
 ```
 
-2. Crea un ambiente virtuale:
+2. Create a virtual environment:
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # Su Windows: .venv\Scripts\activate
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
-3. Installa le dipendenze:
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-## ⚙️ Configurazione
+## :gear: Configuration
 
-Crea un file `.env` nella root del progetto (puoi copiare `.env.example`):
+Create a `.env` file in the project root (you can copy `.env.example`):
 
 ```env
 WEBSOCKET_URL = "https://ws.playscopa.online/"
@@ -51,85 +51,85 @@ STRESSER_SESSIONS = 1000
 DURATION = 600
 ```
 
-### Parametri
+### Parameters
 
-| Parametro | Descrizione | Default |
+| Parameter | Description | Default |
 |-----------|-------------|---------|
-| `WEBSOCKET_URL` | URL del server WebSocket da testare | `ws://localhost:8080` |
-| `STRESSER_SESSIONS` | Numero di client simultanei da simulare | `10` |
-| `DURATION` | Durata del test in secondi (attualmente non implementato) | `5` |
+| `WEBSOCKET_URL` | WebSocket server URL to test | `ws://localhost:8080` |
+| `STRESSER_SESSIONS` | Number of concurrent clients to simulate | `10` |
+| `DURATION` | Test duration in seconds (not yet implemented) | `5` |
 
-## 🎯 Utilizzo
+## :dart: Usage
 
-Esegui lo stress test:
+Run the stress test:
 
 ```bash
 python -m src.main
 ```
 
-Il programma creerà il numero di client specificato e li collegherà al server con un piccolo delay tra una connessione e l'altra (0.00004s) per evitare di sovraccaricare immediatamente il server.
+The program will create the specified number of clients and connect them to the server with a small delay between connections (0.00004s) to avoid immediately overwhelming the server.
 
-## 🏗️ Architettura
+## :building_construction: Architecture
 
-### Struttura del progetto
+### Project Structure
 
 ```
 src/
 ├── __init__.py
-├── main.py          # Entry point dell'applicazione
-├── config.py        # Gestione configurazione da .env
-└── client.py        # Implementazione del client WebSocket
+├── main.py          # Application entry point
+├── config.py        # Configuration management from .env
+└── client.py        # WebSocket client implementation
 ```
 
-### Componenti principali
+### Main Components
 
 #### StressClient (`client.py`)
 
-Ogni istanza di `StressClient` rappresenta un client virtuale che:
+Each `StressClient` instance represents a virtual client that:
 
-1. **Listener Loop** (`_listener_loop`): Riceve ed elabora i messaggi dal server
-   - `welcome`: Risponde con richiesta opzioni
-   - `ping`: Risponde con pong
-   - `start`/`turn`: Attiva l'invio di una mossa
-   - `startingCards`: Salva le carte ricevute
-   - `remove_table_cards_combosAvail`: Sceglie la prima combo disponibile
+1. **Listener Loop** (`_listener_loop`): Receives and processes messages from the server
+   - `welcome`: Responds with options request
+   - `ping`: Responds with pong
+   - `start`/`turn`: Activates sending a move
+   - `startingCards`: Saves received cards
+   - `remove_table_cards_combosAvail`: Chooses the first available combo
 
-2. **Sender** (`_sender`): Invia le mosse al server
-   - Aspetta di avere carte disponibili
-   - Aspetta il turno
-   - Invia una mossa casuale
+2. **Sender** (`_sender`): Sends moves to the server
+   - Waits for cards to be available
+   - Waits for turn
+   - Sends a random move
 
-3. **Sincronizzazione**: Utilizza `asyncio.Event` per coordinare listener e sender:
-   - `cards_populated`: Segnala quando le carte sono disponibili
-   - `clear_to_send`: Segnala quando è il turno del client
+3. **Synchronization**: Uses `asyncio.Event` to coordinate listener and sender:
+   - `cards_populated`: Signals when cards are available
+   - `clear_to_send`: Signals when it's the client's turn
 
-## 🔧 Note tecniche
+## :wrench: Technical Notes
 
-- Il delay di 0.00004s tra connessioni funziona bene in locale ma potrebbe richiedere aggiustamenti in produzione (specialmente dietro Cloudflare)
-- Utilizza `asyncio.TaskGroup` per gestione pulita delle task concorrenti
-- Timeout di connessione impostato a 30 secondi
-- Non è un attacco DDoS: è uno strumento di test autorizzato per il proprio server
+- The 0.00004s delay between connections works well locally but may require adjustments in production (especially behind Cloudflare)
+- Uses `asyncio.TaskGroup` for clean concurrent task management
+- Connection timeout set to 30 seconds
+- This is not a DDoS attack: it's an authorized testing tool for your own server
 
-## ⚠️ Limitazioni
+## :warning: Limitations
 
-- Il parametro `DURATION` è configurabile ma non ancora implementato
-- I client non implementano tutta la logica di gioco (es. strategia di gioco avanzata)
-- Nessuna raccolta di statistiche dettagliate (da implementare)
+- The `DURATION` parameter is configurable but not yet implemented
+- Clients don't implement complete game logic (e.g., advanced game strategy)
+- No detailed statistics collection (to be implemented)
 
-## 🛠️ Sviluppo
+## :hammer_and_wrench: Development
 
-Per installare le dipendenze di sviluppo:
+To install development dependencies:
 
 ```bash
 pip install -r requirements-dev.txt
 ```
 
-## 📄 Licenza
+## :page_facing_up: License
 
-MIT License - vedi [LICENSE](LICENSE) per dettagli.
+MIT License - see [LICENSE](LICENSE) for details.
 
 Copyright (c) 2025 bismarckssr
 
-## ⚖️ Disclaimer
+## :balance_scale: Disclaimer
 
-Questo strumento è stato creato per testare esclusivamente server di cui si ha l'autorizzazione. L'uso improprio per attacchi DDoS o per sovraccaricare server non autorizzati è illegale e contrario all'etica.
+This tool was created exclusively for testing servers for which you have authorization. Improper use for DDoS attacks or overloading unauthorized servers is illegal and unethical.
