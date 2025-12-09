@@ -1,7 +1,8 @@
 import asyncio
 import json
-from websockets.asyncio.client import connect, ClientConnection
 from dataclasses import dataclass, field
+
+from websockets.asyncio.client import ClientConnection, connect
 
 
 @dataclass
